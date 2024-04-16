@@ -8,16 +8,14 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
-const corsOptions = {
-  origin: 'http://localhost:3000',
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
+const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
-// app.use(cors());
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
+app.use(cors({
+  origin: true, 
+  credentials: true,
+ }));
 app.use(cookieParser());
 
 const db = mysql.createConnection({
@@ -169,8 +167,8 @@ app.get('/', (req, res) => {
   res.send('Just chilling');
 });
 
-app.listen(3001, () => {
-console.log('Listening to port 3001');
+app.listen(PORT, () => {
+console.log(` Server is running on https://localhost://${PORT}`);
 });
 
 
