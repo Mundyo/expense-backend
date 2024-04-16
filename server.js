@@ -133,7 +133,7 @@ app.post('/account', (req, res) => {
 
 
 
-app.get('/', (req, res) => {
+app.get('/account', (req, res) => {
 
   const user_id = req.query.user_id;
   const username = req.query.username;
@@ -165,6 +165,9 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.send('Just chilling');
+});
 
 app.listen(3001, () => {
 console.log('Listening to port 3001');
