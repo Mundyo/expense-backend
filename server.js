@@ -133,7 +133,7 @@ app.post('/account', (req, res) => {
 
 
 
-app.get('/account', (req, res) => {
+app.get('/', (req, res) => {
 
   const user_id = req.query.user_id;
   const username = req.query.username;
