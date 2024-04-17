@@ -12,11 +12,16 @@ const PORT = process.env.PORT || 3001;
 
 
 app.use(express.json());
-
 app.use(cors({
-  origin: true, 
-  credentials: true,
- }));
+  origin: 'http://localhost:3000',
+  credentials: true 
+}));
+
+
+// app.use(cors({
+//   origin: true, 
+//   credentials: true,
+//  }));
 app.use(cookieParser());
 
 
@@ -25,15 +30,15 @@ app.use(cookieParser());
 const db = mysql.createConnection({
 
 
-  // host: process.env.DB_HOST,
-  // user: process.env.DB_USER,
-  // password: process.env.DB_PASSWORD,
-  // database: process.env.DB_DATABASE,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
 
-  host: 'localhost',
-  user: 'root',
-  password:'Kasongi2014!',
-  database:'expense_tracking',
+  // host: 'localhost',
+  // user: 'root',
+  // password:'Kasongi2014!',
+  // database:'expense_tracking',
  
 });
 
