@@ -4,6 +4,8 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
+require('dotenv').config();
+
 
 
 const app = express();
@@ -26,21 +28,14 @@ app.use(cookieParser());
 
 
 
-
 const db = mysql.createConnection({
-
-
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-
-  // host: 'localhost',
-  // user: 'root',
-  // password:'Kasongi2014!',
-  // database:'expense_tracking',
- 
 });
+
+
 
 db.connect((err) => {
   if (err) {
@@ -154,6 +149,7 @@ app.get('/account', (req, res) => {
   const username = req.query.username;
  
   
+
 
   if (!user_id) {
     return res.status(401).json({ success: false, message: 'User not authenticated.' });
