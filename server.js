@@ -4,13 +4,31 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
+const Pool = require('pg').Pool;
 require('dotenv').config();
-
 
 
 const app = express();
 
 const PORT = process.env.PORT || 3001;
+
+
+const client = new Pool ({
+  host : 'localhost',
+  user : 'postgres',
+  port : 5432,
+  password: 'kasongi',
+  database : 'postgres'
+})
+
+client.connect((err)=>{
+  if(err) {
+    console.error('error connecting to POstgreSQL:', err);
+  } else {
+    console.log('connected to PostgreSQL');
+  }
+});
+
 
 
 app.use(express.json());
@@ -19,32 +37,7 @@ app.use(cors({
   credentials: true 
 }));
 
-
-// app.use(cors({
-//   origin: true, 
-//   credentials: true,
-//  }));
 app.use(cookieParser());
-
-
-
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-});
-
-
-
-db.connect((err) => {
-  if (err) {
-    console.log("Couldn't connect to the database:", err);
-  } else {
-    console.log('Connected to MYSQL');
-  }
-});
-
 
 app.post('/signup', (req, res) => {
   const { username, password } = req.body;
@@ -52,9 +45,12 @@ app.post('/signup', (req, res) => {
 
   console.log('Received data:', { username, password });
 
-  const sql = 'INSERT INTO users (username, password) VALUES (?, ?)';
+  const sql = 'INSERT INTO users (username, password) VALUES ($1, $2)';
+  const values = [username, password];
 
-  db.query(sql, [username, password], (err, result) => {
+
+
+  client.query(sql, values, (err, result) => {
     if (err) {
       console.error('Error executing SQL query:', err);
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -69,27 +65,27 @@ app.post('/signup', (req, res) => {
 
 
 app.post('/login', (req, res) => {
-  const sql = 'SELECT * FROM expense_tracking.users WHERE username = ? AND password = ?';
+  const sql = 'SELECT * FROM users WHERE username = $1 AND password = $2';
   const { username, password } = req.body;
 
   console.log('Received login request:', { username, password });
 
-  db.query(sql, [username, password], (err, result) => {
+  client.query(sql, [username, password], (err, result) => {
     if (err) {
       console.error('Error executing SQL query:', err);
       res.status(500).json({ success: false, message: 'Internal server error' });
     } else {
-      if (result.length > 0) {
-        const userId = result[0].user_id;
+      if (result.rows.length > 0) {
+        const userId = result.rows[0].id;
 
       
         res.cookie('user_id', userId, { httpOnly: true });
 
         console.log('Setting user_id cookie:', userId);
 
-        const fetchExpensesSql = 'SELECT * FROM expense_tracking.items WHERE user_id = ?';
+        const fetchExpensesSql = 'SELECT * FROM items WHERE user_id =$1';
 
-        db.query(fetchExpensesSql, [userId], (fetchError, expenses) => {
+        client.query(fetchExpensesSql, [userId], (fetchError, expenses) => {
           if (fetchError) {
             console.error('Error fetching expense:', fetchError);
             res.status(500).json({ success: false, message: 'Error fetching expenses' });
@@ -127,9 +123,9 @@ app.post('/account', (req, res) => {
   console.log('Received data:', { title, amount, date, user_id });
   console.log('Received user_id from cookie:', user_id);
 
-  const sql = 'INSERT INTO expense_tracking.items (item_name, price, date, user_id) VALUES (?, ?, STR_TO_DATE(?, "%Y-%m-%dT%H:%i:%s.000Z"), ?)';
+  const sql = 'INSERT INTO items (item_name, price, date, user_id) VALUES ($1, $2, $3, $4)';
 
-  db.query(sql, [title, amount, date, user_id ], (err, result) => {
+  client.query(sql, [title, amount, date, user_id ], (err, result) => {
     if (err) {
       console.error('Error executing SQL query:', err);
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -146,7 +142,7 @@ app.post('/account', (req, res) => {
 app.get('/account', (req, res) => {
 
   const user_id = req.query.user_id;
-  const username = req.query.username;
+  // const username = req.query.username;
  
   
 
@@ -155,9 +151,9 @@ app.get('/account', (req, res) => {
     return res.status(401).json({ success: false, message: 'User not authenticated.' });
   }
 
-  const fetchExpensesSql = `SELECT * FROM expense_tracking.items WHERE user_id = ?`;
+  const fetchExpensesSql = `SELECT * FROM items WHERE user_id = $1`;
 
-  db.query(fetchExpensesSql, [user_id], (fetchError, expenses) => {
+  client.query(fetchExpensesSql, [user_id], (fetchError, expenses) => {
     if (fetchError) {
       console.error('Error fetching expenses:', fetchError);
       res.status(500).json({ success: false, message: 'Error fetching expenses' });
@@ -169,9 +165,9 @@ app.get('/account', (req, res) => {
         message: 'Expenses fetched successfully.',
         user_id: user_id,
         expenses: expenses,
-        username: username,
+        // username: username,
       });
-      // console.log(username)
+     
     }
   });
 });
@@ -185,5 +181,7 @@ console.log(` Server is running on https://localhost://${PORT}`);
 });
 
 
-
+process.on('exit', () =>{
+  client.end();
+});
 
