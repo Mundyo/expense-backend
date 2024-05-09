@@ -2,7 +2,6 @@
 
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql');
 const cookieParser = require('cookie-parser');
 const Pool = require('pg').Pool;
 require('dotenv').config();
@@ -13,12 +12,19 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 
-const client = new Pool ({
-  host : 'localhost',
-  user : 'postgres',
-  port : 5432,
-  password: 'kasongi',
-  database : 'postgres'
+// const client = new Pool ({
+//   host : 'localhost',
+//   user : 'postgres',
+//   port : 5432,
+//   password: 'kasongi',
+//   database : 'postgres'
+// })
+
+const client = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 })
 
 client.connect((err)=>{
