@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3001;
 // })
 
 const client = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: isProduction ? process.env.DATABASE_URL : connectionString,
   ssl: {
     rejectUnauthorized: false
   }
