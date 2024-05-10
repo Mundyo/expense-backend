@@ -20,6 +20,8 @@ const PORT = process.env.PORT || 3001;
 //   database : 'postgres'
 // })
 
+const DATABASE_URL = 'postgres://uepniscm6paksb:p398e9fea0e3d0ee861113f59b9042719144e1a10ea28b94027cbfc238696913f@ceqbglof0h8enj.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d5is9tsvl1ibp9';
+
 const client = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
