@@ -11,15 +11,6 @@ const app = express();
 
 const PORT = process.env.PORT || 3001;
 
-
-// const client = new Pool ({
-//   host : 'localhost',
-//   user : 'postgres',
-//   port : 5432,
-//   password: 'kasongi',
-//   database : 'postgres'
-// })
-
 const DATABASE_URL = 'postgres://uepniscm6paksb:p398e9fea0e3d0ee861113f59b9042719144e1a10ea28b94027cbfc238696913f@ceqbglof0h8enj.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d5is9tsvl1ibp9';
 
 const client = new Pool({
@@ -41,7 +32,7 @@ client.connect((err)=>{
 
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'https://expense-frontend-8e88af1feda2.herokuapp.com',
   credentials: true 
 }));
 
