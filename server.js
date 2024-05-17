@@ -1,5 +1,6 @@
 
 
+
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -18,11 +19,16 @@ const client = new Pool({
   ssl: {
     rejectUnauthorized:false
   }
+  // host:'localhost',
+  // user:'postgres',
+  // database:'postgres',
+  // password:'kasongi',
+  // port:5432,
 })
 
 client.connect((err)=>{
   if(err) {
-    console.error('error connecting to POstgreSQL:', err);
+    console.error('error connecting to PostgreSQL:', err);
   } else {
     console.log('connected to PostgreSQL');
   }
@@ -33,6 +39,9 @@ client.connect((err)=>{
 app.use(express.json());
 app.use(cors({
   origin: 'https://expense-frontend-8e88af1feda2.herokuapp.com',
+
+  // origin: 'http://localhost:3000',
+ 
   credentials: true 
 }));
 
@@ -171,6 +180,21 @@ app.get('/account', (req, res) => {
   });
 });
 
+app.delete('/account/:id', (req, res) => {
+  const expenseId = req.params.id;
+  
+  const sql = 'DELETE FROM items WHERE id = $1';
+  client.query(sql, [expenseId], (err, result) => {
+    if (err) {
+      console.error('Error executing SQL query:', err);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    } else {
+      console.log('Expense deleted successfully!');
+      res.status(200).json({ success: true, message: 'Expense deleted successfully.' });
+    }
+  });
+});
+
 app.get('/', (req, res) => {
   res.send('Just chilling');
 });
@@ -183,4 +207,3 @@ console.log(` Server is running on https://localhost://${PORT}`);
 process.on('exit', () =>{
   client.end();
 });
-
